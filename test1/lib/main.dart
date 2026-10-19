@@ -42,6 +42,11 @@ enum CategoryP {
   all,
 }
 
+List<String> catP = ['school', 'robotics', 'home', 'all'];
+List<String> catt = ['school', 'robotics', 'home'];
+List<String> pList = ['low', 'medium', 'high'];
+String dueDateS = 'n';
+
 Priorety? selectedPriority = Priorety.low;
 Priorety? tempereryP = Priorety.low;
 Category selectedCategory = Category.robotics;
@@ -49,15 +54,18 @@ Category? tempereryC = Category.robotics;
 CategoryP selectedCategoryP = CategoryP.robotics;
 CategoryP? tempereryCP = CategoryP.all;
 
+String catToBeReturnd = 'robotics';
+String pToBeReturnd = '';
+
 class PrAndDate {
-  DateTime dueDate;
-  Priorety? pr;
+  String dueDate;
+  String? pr;
   PrAndDate({required this.pr, required this.dueDate});
 }
 
 class Task {
   TextDecoration deco;
-  Category cat;
+  String cat;
   String dateIsAfter;
   Color pColor;
   String name;
@@ -120,9 +128,12 @@ class _CalcAppState extends State<CalcApp> {
                         ),
                       ),
                       TableCalendar(
-                    firstDay: DateTime.utc(2026, 1, 1),
+                    firstDay: DateTime.now(),
                     lastDay: DateTime.utc(2035, 12, 31),
                     focusedDay: focusedDay,
+                    headerStyle: const HeaderStyle(
+                      formatButtonVisible: false,
+                    ),
                     selectedDayPredicate: (day) {
                       return isSameDay(selectedDay, day);
                     },
@@ -134,39 +145,54 @@ class _CalcAppState extends State<CalcApp> {
                       });
                     },
                   ),
-                  DropdownMenu<Priorety>(
-                    initialSelection: Priorety.low,
-                    label: const Text('Select Size'),
-                    onSelected: (Priorety? value) {
+                  DropdownMenu<String>(
+                    initialSelection: 'low',
+                    label: const Text('Select Category'),
+                    onSelected: (String? value) {
                       setDialogState(() {
-                        selectedPriority = value;
-                        tempereryP = value;
-                      });
-                    },
-                    dropdownMenuEntries: Priorety.values
-                        .map<DropdownMenuEntry<Priorety>>((Priorety p) {
-                      return DropdownMenuEntry<Priorety>(
-                        value: p,
-                        label: ('$p'),
-                      );
-                    }).toList(),
-                  ),
-                  DropdownMenu<Category>(
-                    initialSelection: Category.robotics,
-                    label: const Text('Select category'),
-                    onSelected: (Category? value) {
-                      setDialogState(() {
-                        tempereryC = value;
-                        if(!(value == null)) {
-                          selectedCategory = value;
+                        if(value == 'low') {
+                          selectedPriority = Priorety.low;
+                          tempereryP = Priorety.low;
+                        } else if(value == 'medium') {
+                          selectedPriority = Priorety.medium;
+                          tempereryP = Priorety.medium;
+                        } else {
+                          selectedPriority = Priorety.high;
+                          tempereryP = Priorety.high;
                         }
                       });
                     },
-                    dropdownMenuEntries: Category.values
-                        .map<DropdownMenuEntry<Category>>((Category p) {
-                      return DropdownMenuEntry<Category>(
+                    dropdownMenuEntries: pList.map<DropdownMenuEntry<String>>((String p) {
+                      return DropdownMenuEntry<String>( 
                         value: p,
-                        label: ('$p'),
+                        label: p,
+                      );
+                    }).toList(),
+                  ),
+                  DropdownMenu<String>(
+                    initialSelection: 'robotics',
+                    label: const Text('Select category'),
+                    onSelected: (String? value) {
+                      setDialogState(() {
+                        if(value == 'robotics') {
+                          tempereryC = Category.robotics;
+                          catToBeReturnd = 'robotics';
+                          selectedCategory = Category.robotics;
+                        } else if(value == 'home') {
+                          tempereryC = Category.home;
+                          catToBeReturnd = 'home';
+                          selectedCategory = Category.home;
+                        } else {
+                          tempereryC = Category.school;
+                          catToBeReturnd = 'school';
+                          selectedCategory = Category.school;
+                        }
+                      });
+                    },
+                    dropdownMenuEntries: catt.map<DropdownMenuEntry<String>>((String p) {
+                      return DropdownMenuEntry<String>( 
+                        value: p,
+                        label: p,
                       );
                     }).toList(),
                   ),
@@ -198,6 +224,7 @@ class _CalcAppState extends State<CalcApp> {
 
     if (result != null && result.trim().isNotEmpty) {
       setState(() {
+        dueDateS = "${selectedDay.year}-${selectedDay.month}-${selectedDay.day}";
         if(tempereryP == Priorety.low) {
           tColor = Colors.green;
         } else if(tempereryP == Priorety.medium) {
@@ -205,25 +232,28 @@ class _CalcAppState extends State<CalcApp> {
         } else {
           tColor = Colors.red;
         }
-        if(!(dateToAdd.isAfter(DateTime.now()))) {
+        if(!(dateToAdd.isAfter(DateTime.now().add(const Duration(days: -1))))) {
           dateIsAfterT = "due date past!";
         }
         isListEmpty = ''; 
         if(tempereryP == Priorety.low) {
-          todoListLow.add(Task(name: result, prAndDate: PrAndDate(pr: tempereryP, dueDate: dateToAdd), pColor: tColor, dateIsAfter: dateIsAfterT, cat: selectedCategory, deco: TextDecoration.none));
+          pToBeReturnd = 'low';
+          todoListLow.add(Task(name: result, prAndDate: PrAndDate(pr: pToBeReturnd, dueDate: dueDateS), pColor: tColor, dateIsAfter: dateIsAfterT, cat: catToBeReturnd, deco: TextDecoration.none));
         } else if(tempereryP == Priorety.medium) {
-          todoListMedium.add(Task(name: result, prAndDate: PrAndDate(pr: tempereryP, dueDate: dateToAdd), pColor: tColor, dateIsAfter: dateIsAfterT, cat: selectedCategory, deco: TextDecoration.none));
+          pToBeReturnd = "medium";
+          todoListMedium.add(Task(name: result, prAndDate: PrAndDate(pr: pToBeReturnd, dueDate: dueDateS), pColor: tColor, dateIsAfter: dateIsAfterT, cat: catToBeReturnd, deco: TextDecoration.none));
         } else {
-          todoListHigh.add(Task(name: result, prAndDate: PrAndDate(pr: tempereryP, dueDate: dateToAdd), pColor: tColor, dateIsAfter: dateIsAfterT, cat: selectedCategory, deco: TextDecoration.none));
+          pToBeReturnd = "high";
+          todoListHigh.add(Task(name: result, prAndDate: PrAndDate(pr: pToBeReturnd, dueDate: dueDateS), pColor: tColor, dateIsAfter: dateIsAfterT, cat: catToBeReturnd, deco: TextDecoration.none));
         }
         if(selectedCategory == Category.robotics) {
-          todoListRobotics.add(Task(name: result, prAndDate: PrAndDate(pr: tempereryP, dueDate: dateToAdd), pColor: tColor, dateIsAfter: dateIsAfterT, cat: selectedCategory, deco: TextDecoration.none));
+          todoListRobotics.add(Task(name: result, prAndDate: PrAndDate(pr: pToBeReturnd, dueDate: dueDateS), pColor: tColor, dateIsAfter: dateIsAfterT, cat: catToBeReturnd, deco: TextDecoration.none));
         } else if(selectedCategory == Category.school) {
-          todoListSchool.add(Task(name: result, prAndDate: PrAndDate(pr: tempereryP, dueDate: dateToAdd), pColor: tColor, dateIsAfter: dateIsAfterT, cat: selectedCategory, deco: TextDecoration.none));
+          todoListSchool.add(Task(name: result, prAndDate: PrAndDate(pr: pToBeReturnd, dueDate: dueDateS), pColor: tColor, dateIsAfter: dateIsAfterT, cat: catToBeReturnd, deco: TextDecoration.none));
         } else {
-          todoListHome.add(Task(name: result, prAndDate: PrAndDate(pr: tempereryP, dueDate: dateToAdd), pColor: tColor, dateIsAfter: dateIsAfterT, cat: selectedCategory, deco: TextDecoration.none));
+          todoListHome.add(Task(name: result, prAndDate: PrAndDate(pr: pToBeReturnd, dueDate: dueDateS), pColor: tColor, dateIsAfter: dateIsAfterT, cat: catToBeReturnd, deco: TextDecoration.none));
         }
-        todoList.add(Task(name: result, prAndDate: PrAndDate(pr: tempereryP, dueDate: dateToAdd), pColor: tColor, dateIsAfter: dateIsAfterT, cat: selectedCategory, deco: TextDecoration.none));
+        todoList.add(Task(name: result, prAndDate: PrAndDate(pr: pToBeReturnd, dueDate: dueDateS), pColor: tColor, dateIsAfter: dateIsAfterT, cat: catToBeReturnd, deco: TextDecoration.none));
       });
       dialogController.clear();
     }
@@ -236,7 +266,6 @@ class _CalcAppState extends State<CalcApp> {
       isListEmpty = "no tasks yet";
     }
     return Scaffold(
-      backgroundColor: Colors.blue,
       appBar: AppBar(title: const Text('To Do List')),
       body: Center(
         child: SizedBox(
@@ -244,40 +273,43 @@ class _CalcAppState extends State<CalcApp> {
           child: Column(
             children: [
               Row(
+                mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Text(isListEmpty),
-                  DropdownMenu<CategoryP>(
-                    initialSelection: CategoryP.all,
+                  SizedBox(
+                    width: 20,
+                  ),
+                  DropdownMenu<String>(
+                    initialSelection: 'all',
                     label: const Text('Select category'),
-                    // 3. Triggered when user selects an option
-                    onSelected: (CategoryP? value) {
-                        if(value == CategoryP.all) {
+                    onSelected: (String? value) {
+                        if(value == 'all') {
                           todoListToDisplayLow = todoListLow;
                           todoListToDisplayMedium = todoListMedium;
                           todoListToDisplayHigh = todoListHigh;
-                        } else if(value == CategoryP.robotics) {
+                        } else if(value == 'robotics') {
                           todoListToDisplayHigh = [];
                           todoListToDisplayMedium = [];
                           todoListToDisplayLow = [];
                           for(int i = 0; i < todoListRobotics.length; i++) {
-                            Priorety? p = todoListRobotics[i].prAndDate.pr;
-                            if(p == Priorety.low) {
+                            String? p = todoListRobotics[i].prAndDate.pr;
+                            if(p == 'low') {
                               todoListToDisplayLow.add(todoListRobotics[i]);
-                            } else if(p == Priorety.medium) {
+                            } else if(p == 'medium') {
                               todoListToDisplayMedium.add(todoListRobotics[i]);
                             } else {
                               todoListToDisplayHigh.add(todoListRobotics[i]);
                             }
                           }
-                        } else if(value == CategoryP.school) {
+                        } else if(value == 'school') {
                           todoListToDisplayHigh = [];
                           todoListToDisplayMedium = [];
                           todoListToDisplayLow = [];
                           for(int i = 0; i < todoListSchool.length; i++) {
-                            Priorety? p = todoListSchool[i].prAndDate.pr;
-                            if(p == Priorety.low) {
+                            String? p = todoListSchool[i].prAndDate.pr;
+                            if(p == 'low') {
                               todoListToDisplayLow.add(todoListSchool[i]);
-                            } else if(p == Priorety.medium) {
+                            } else if(p == 'medium') {
                               todoListToDisplayMedium.add(todoListSchool[i]);
                             } else {
                               todoListToDisplayHigh.add(todoListSchool[i]);
@@ -288,23 +320,22 @@ class _CalcAppState extends State<CalcApp> {
                           todoListToDisplayMedium = [];
                           todoListToDisplayLow = [];
                           for(int i = 0; i < todoListHome.length; i++) {
-                            Priorety? p = todoListHome[i].prAndDate.pr;
-                            if(p == Priorety.low) {
+                            String? p = todoListHome[i].prAndDate.pr;
+                            if(p == 'low') {
                               todoListToDisplayLow.add(todoListHome[i]);
-                            } else if(p == Priorety.medium) {
+                            } else if(p == 'medium') {
                               todoListToDisplayMedium.add(todoListHome[i]);
                             } else {
                               todoListToDisplayHigh.add(todoListHome[i]);
                             }
                           }
                         }
-                      setState(() {});
+                      setState((){});
                     },
-                    dropdownMenuEntries: CategoryP.values
-                        .map<DropdownMenuEntry<CategoryP>>((CategoryP p) {
-                      return DropdownMenuEntry<CategoryP>(
+                    dropdownMenuEntries: catP.map<DropdownMenuEntry<String>>((String p) {
+                      return DropdownMenuEntry<String>( 
                         value: p,
-                        label: ('$p'),
+                        label: p,
                       );
                     }).toList(),
                   ),
