@@ -1,18 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:table_calendar/table_calendar.dart';
+import 'sort_by_priority.dart';
 
+Sortbypriority S = Sortbypriority();
 
-List<Map<String, List<dynamic>>> tasksAndDates = [];
 List<Task> todoList = [];
-List<Task> todoListLow = [];
-List<Task> todoListMedium = [];
-List<Task> todoListHigh = [];
-List<Task> todoListRobotics = [];
-List<Task> todoListSchool = [];
-List<Task> todoListHome = [];
-List<Task> todoListToDisplayLow = todoListLow;
-List<Task> todoListToDisplayMedium = todoListMedium;
-List<Task> todoListToDisplayHigh = todoListHigh;
+List<Task> todoListToDisplay = todoList;
 
 final List<Task> selected = [];
 final TextEditingController dialogController = TextEditingController();
@@ -70,7 +63,8 @@ class Task {
   Color pColor;
   String name;
   PrAndDate prAndDate;
-  Task({required this.name, required this.prAndDate, required this.pColor, required this.dateIsAfter, required this.cat, required this.deco});
+  int i;
+  Task({required this.name, required this.prAndDate, required this.pColor, required this.dateIsAfter, required this.cat, required this.deco, required this.i});
 }
 
 void main() {
@@ -235,30 +229,24 @@ class _CalcAppState extends State<CalcApp> {
         if(!(dateToAdd.isAfter(DateTime.now().add(const Duration(days: -1))))) {
           dateIsAfterT = "due date past!";
         }
-        isListEmpty = ''; 
+        isListEmpty = '';
+        int iT = 0; 
         if(tempereryP == Priorety.low) {
           pToBeReturnd = 'low';
-          todoListLow.add(Task(name: result, prAndDate: PrAndDate(pr: pToBeReturnd, dueDate: dueDateS), pColor: tColor, dateIsAfter: dateIsAfterT, cat: catToBeReturnd, deco: TextDecoration.none));
+          iT = 3;
         } else if(tempereryP == Priorety.medium) {
+          iT = 2;
           pToBeReturnd = "medium";
-          todoListMedium.add(Task(name: result, prAndDate: PrAndDate(pr: pToBeReturnd, dueDate: dueDateS), pColor: tColor, dateIsAfter: dateIsAfterT, cat: catToBeReturnd, deco: TextDecoration.none));
         } else {
+          iT = 1;
           pToBeReturnd = "high";
-          todoListHigh.add(Task(name: result, prAndDate: PrAndDate(pr: pToBeReturnd, dueDate: dueDateS), pColor: tColor, dateIsAfter: dateIsAfterT, cat: catToBeReturnd, deco: TextDecoration.none));
         }
-        if(selectedCategory == Category.robotics) {
-          todoListRobotics.add(Task(name: result, prAndDate: PrAndDate(pr: pToBeReturnd, dueDate: dueDateS), pColor: tColor, dateIsAfter: dateIsAfterT, cat: catToBeReturnd, deco: TextDecoration.none));
-        } else if(selectedCategory == Category.school) {
-          todoListSchool.add(Task(name: result, prAndDate: PrAndDate(pr: pToBeReturnd, dueDate: dueDateS), pColor: tColor, dateIsAfter: dateIsAfterT, cat: catToBeReturnd, deco: TextDecoration.none));
-        } else {
-          todoListHome.add(Task(name: result, prAndDate: PrAndDate(pr: pToBeReturnd, dueDate: dueDateS), pColor: tColor, dateIsAfter: dateIsAfterT, cat: catToBeReturnd, deco: TextDecoration.none));
-        }
-        todoList.add(Task(name: result, prAndDate: PrAndDate(pr: pToBeReturnd, dueDate: dueDateS), pColor: tColor, dateIsAfter: dateIsAfterT, cat: catToBeReturnd, deco: TextDecoration.none));
+        todoList.add(Task(name: result, prAndDate: PrAndDate(pr: pToBeReturnd, dueDate: dueDateS), pColor: tColor, dateIsAfter: dateIsAfterT, cat: catToBeReturnd, deco: TextDecoration.none, i: iT));
+        todoList.sort((a, b) => b.i.compareTo(a.i));
       });
       dialogController.clear();
     }
   }
-
 
   @override
   Widget build(BuildContext context) {
@@ -284,49 +272,26 @@ class _CalcAppState extends State<CalcApp> {
                     label: const Text('Select category'),
                     onSelected: (String? value) {
                         if(value == 'all') {
-                          todoListToDisplayLow = todoListLow;
-                          todoListToDisplayMedium = todoListMedium;
-                          todoListToDisplayHigh = todoListHigh;
+                          todoListToDisplay = todoList;
                         } else if(value == 'robotics') {
-                          todoListToDisplayHigh = [];
-                          todoListToDisplayMedium = [];
-                          todoListToDisplayLow = [];
-                          for(int i = 0; i < todoListRobotics.length; i++) {
-                            String? p = todoListRobotics[i].prAndDate.pr;
-                            if(p == 'low') {
-                              todoListToDisplayLow.add(todoListRobotics[i]);
-                            } else if(p == 'medium') {
-                              todoListToDisplayMedium.add(todoListRobotics[i]);
-                            } else {
-                              todoListToDisplayHigh.add(todoListRobotics[i]);
+                          todoListToDisplay = [];
+                          for(int i = 0; i < todoList.length; i++) {
+                            if(todoList[i].cat == 'robotics') {
+                              todoListToDisplay.add(todoList[i]);
                             }
                           }
                         } else if(value == 'school') {
-                          todoListToDisplayHigh = [];
-                          todoListToDisplayMedium = [];
-                          todoListToDisplayLow = [];
-                          for(int i = 0; i < todoListSchool.length; i++) {
-                            String? p = todoListSchool[i].prAndDate.pr;
-                            if(p == 'low') {
-                              todoListToDisplayLow.add(todoListSchool[i]);
-                            } else if(p == 'medium') {
-                              todoListToDisplayMedium.add(todoListSchool[i]);
-                            } else {
-                              todoListToDisplayHigh.add(todoListSchool[i]);
+                          todoListToDisplay = [];
+                          for(int i = 0; i < todoList.length; i++) {
+                            if(todoList[i].cat == 'school') {
+                              todoListToDisplay.add(todoList[i]);
                             }
                           }
                         } else {
-                          todoListToDisplayHigh = [];
-                          todoListToDisplayMedium = [];
-                          todoListToDisplayLow = [];
-                          for(int i = 0; i < todoListHome.length; i++) {
-                            String? p = todoListHome[i].prAndDate.pr;
-                            if(p == 'low') {
-                              todoListToDisplayLow.add(todoListHome[i]);
-                            } else if(p == 'medium') {
-                              todoListToDisplayMedium.add(todoListHome[i]);
-                            } else {
-                              todoListToDisplayHigh.add(todoListHome[i]);
+                          todoListToDisplay = [];
+                          for(int i = 0; i < todoList.length; i++) {
+                            if(todoList[i].cat == 'home') {
+                              todoListToDisplay.add(todoList[i]);
                             }
                           }
                         }
@@ -344,7 +309,7 @@ class _CalcAppState extends State<CalcApp> {
               Expanded(
                 child: ListView(
                   children: 
-                  todoListToDisplayLow.map((Task task) {
+                  todoListToDisplay.map((Task task) {
                     return ListTile(
                       leading: Checkbox(
                         value: selected.contains(task),
@@ -371,99 +336,8 @@ class _CalcAppState extends State<CalcApp> {
                         icon: const Icon(Icons.delete),
                         onPressed: () {
                           setState(() {
-                            todoListToDisplayLow.remove(task);
-                            todoListLow.removeWhere((task) => task.name == task.name);
-                            todoList.removeWhere((task) => task.name == task.name);
-                          });
-                          if(todoList.isEmpty) {
-                            setState(() {
-                              isListEmpty = "no tasks yet";
-                            });
-                          }
-                        },
-                      ),
-                    );
-                  }).toList(),
-                ),
-              ),
-              Expanded(
-                child: ListView(
-                  children: 
-                  todoListToDisplayMedium.map((Task task) {
-                    return ListTile(
-                      leading: Checkbox(
-                        value: selected.contains(task),
-                        onChanged: (bool? value) {
-                          setState(() {
-                            if (value == true) {
-                              selected.add(task);
-                              task.deco = TextDecoration.lineThrough;
-                            } else {
-                              selected.remove(task);
-                              task.deco = TextDecoration.none;
-                            }
-                          });
-                        },
-                      ),
-                    tileColor: task.pColor,
-                    title: Text(
-                      style: TextStyle(
-                        decoration: task.deco,
-                      ),
-                      '${task.name}    ${task.prAndDate.dueDate}    ${task.prAndDate.pr}    ${task.dateIsAfter}    ${task.cat}'
-                      ),
-                      trailing: IconButton(
-                        icon: const Icon(Icons.delete),
-                        onPressed: () {
-                          setState(() {
-                            todoListToDisplayMedium.remove(task);
-                            todoListMedium.removeWhere((task) => task.name == task.name);
-                            todoList.removeWhere((task) => task.name == task.name);
-                          });
-                          if(todoList.isEmpty) {
-                            setState(() {
-                              isListEmpty = "no tasks yet";
-                            });
-                          }
-                        },
-                      ),
-                    );
-                  }).toList(),
-                ),
-              ),
-              Expanded(
-                child: ListView(
-                  children: 
-                  todoListToDisplayHigh.map((Task task) {
-                    return ListTile(
-                      leading: Checkbox(
-                        value: selected.contains(task),
-                        onChanged: (bool? value) {
-                          setState(() {
-                            if (value == true) {
-                              selected.add(task);
-                              task.deco = TextDecoration.lineThrough;
-                            } else {
-                              selected.remove(task);
-                              task.deco = TextDecoration.none;
-                            }
-                          });
-                        },
-                      ),
-                    tileColor: task.pColor,
-                    title: Text(
-                      style: TextStyle(
-                        decoration: task.deco,
-                      ),
-                      '${task.name}    ${task.prAndDate.dueDate}    ${task.prAndDate.pr}    ${task.dateIsAfter}    ${task.cat}'
-                      ),
-                      trailing: IconButton(
-                        icon: const Icon(Icons.delete),
-                        onPressed: () {
-                          setState(() {
-                            todoListToDisplayHigh.remove(task);
-                            todoListHigh.removeWhere((task) => task.name == task.name);
-                            todoList.removeWhere((task) => task.name == task.name);
+                            todoList.removeWhere((taask) => taask.name == task.name);
+                            todoListToDisplay.removeWhere((ttask) => ttask.name == task.name);
                           });
                           if(todoList.isEmpty) {
                             setState(() {
@@ -481,15 +355,7 @@ class _CalcAppState extends State<CalcApp> {
                   setState(() {
                     for (var selectedTask in selected) {
                       todoList.removeWhere((item) => item.name == selectedTask.name);
-                      todoListLow.removeWhere((item) => item.name == selectedTask.name);
-                      todoListMedium.removeWhere((item) => item.name == selectedTask.name);
-                      todoListHigh.removeWhere((item) => item.name == selectedTask.name);
-                      todoListRobotics.removeWhere((item) => item.name == selectedTask.name);
-                      todoListSchool.removeWhere((item) => item.name == selectedTask.name);
-                      todoListHome.removeWhere((item) => item.name == selectedTask.name);
-                      todoListToDisplayLow.removeWhere((item) => item.name == selectedTask.name);
-                      todoListToDisplayMedium.removeWhere((item) => item.name == selectedTask.name);
-                      todoListToDisplayHigh.removeWhere((item) => item.name == selectedTask.name);
+                      todoListToDisplay.removeWhere((item) => item.name == selectedTask.name);
                     }
                     selected.clear();
                   });
