@@ -1,8 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:table_calendar/table_calendar.dart';
-import 'sort_by_priority.dart';
-
-Sortbypriority S = Sortbypriority();
 
 List<Task> todoList = [];
 List<Task> todoListToDisplay = todoList;
@@ -16,10 +13,15 @@ DateTime selectedDay = DateTime.now();
 DateTime dateToAdd = DateTime.now();
 late Color tColor;
 String dateIsAfterT = '';
-enum Priorety {
-  low,
-  medium,
-  high,
+enum Priority {
+  low('low', Colors.green),
+  medium('medium', Colors.yellow),
+  high('high', Colors.red);
+
+  final String titleP;
+  final Color cP;
+
+  const Priority(this.titleP, this.cP);
 }
 
 enum Category {
@@ -40,19 +42,19 @@ List<String> catt = ['school', 'robotics', 'home'];
 List<String> pList = ['low', 'medium', 'high'];
 String dueDateS = 'n';
 
-Priorety? selectedPriority = Priorety.low;
-Priorety? tempereryP = Priorety.low;
+Priority? selectedPriority = Priority.low;
+Priority? temporaryP = Priority.low;
 Category selectedCategory = Category.robotics;
-Category? tempereryC = Category.robotics;
+Category? temporaryC = Category.robotics;
 CategoryP selectedCategoryP = CategoryP.robotics;
 CategoryP? tempereryCP = CategoryP.all;
 
-String catToBeReturnd = 'robotics';
-String pToBeReturnd = '';
+String returndCat = 'robotics';
+String returndP = '';
 
 class PrAndDate {
   String dueDate;
-  String? pr;
+  Priority? pr;
   PrAndDate({required this.pr, required this.dueDate});
 }
 
@@ -60,11 +62,10 @@ class Task {
   TextDecoration deco;
   String cat;
   String dateIsAfter;
-  Color pColor;
   String name;
   PrAndDate prAndDate;
   int i;
-  Task({required this.name, required this.prAndDate, required this.pColor, required this.dateIsAfter, required this.cat, required this.deco, required this.i});
+  Task({required this.name, required this.prAndDate, required this.dateIsAfter, required this.cat, required this.deco, required this.i});
 }
 
 void main() {
@@ -122,7 +123,7 @@ class _CalcAppState extends State<CalcApp> {
                         ),
                       ),
                       TableCalendar(
-                    firstDay: DateTime.now(),
+                    firstDay: DateTime.utc(DateTime.now().year, DateTime.now().month, DateTime.now().day),
                     lastDay: DateTime.utc(2035, 12, 31),
                     focusedDay: focusedDay,
                     headerStyle: const HeaderStyle(
@@ -144,15 +145,19 @@ class _CalcAppState extends State<CalcApp> {
                     label: const Text('Select Category'),
                     onSelected: (String? value) {
                       setDialogState(() {
-                        if(value == 'low') {
-                          selectedPriority = Priorety.low;
-                          tempereryP = Priorety.low;
-                        } else if(value == 'medium') {
-                          selectedPriority = Priorety.medium;
-                          tempereryP = Priorety.medium;
-                        } else {
-                          selectedPriority = Priorety.high;
-                          tempereryP = Priorety.high;
+                        switch (value) {
+                          case 'low':
+                            selectedPriority = Priority.low;
+                            temporaryP = Priority.low;
+                            break;
+                          case 'medium':
+                            selectedPriority = Priority.medium;
+                            temporaryP = Priority.medium;
+                            break;
+                          case 'high':
+                            selectedPriority = Priority.high;
+                            temporaryP = Priority.high;
+                            break;
                         }
                       });
                     },
@@ -168,18 +173,22 @@ class _CalcAppState extends State<CalcApp> {
                     label: const Text('Select category'),
                     onSelected: (String? value) {
                       setDialogState(() {
-                        if(value == 'robotics') {
-                          tempereryC = Category.robotics;
-                          catToBeReturnd = 'robotics';
-                          selectedCategory = Category.robotics;
-                        } else if(value == 'home') {
-                          tempereryC = Category.home;
-                          catToBeReturnd = 'home';
-                          selectedCategory = Category.home;
-                        } else {
-                          tempereryC = Category.school;
-                          catToBeReturnd = 'school';
-                          selectedCategory = Category.school;
+                        switch (value) {
+                          case 'robotics':
+                            temporaryC = Category.robotics;
+                            returndCat = 'robotics';
+                            selectedCategory = Category.robotics;
+                            break;
+                          case 'home':
+                            temporaryC = Category.home;
+                            returndCat = 'home';
+                            selectedCategory = Category.home;
+                            break;
+                          case 'school':
+                            temporaryC = Category.school;
+                            returndCat = 'school';
+                            selectedCategory = Category.school;
+                            break;
                         }
                       });
                     },
@@ -219,30 +228,43 @@ class _CalcAppState extends State<CalcApp> {
     if (result != null && result.trim().isNotEmpty) {
       setState(() {
         dueDateS = "${selectedDay.year}-${selectedDay.month}-${selectedDay.day}";
-        if(tempereryP == Priorety.low) {
-          tColor = Colors.green;
-        } else if(tempereryP == Priorety.medium) {
-          tColor = Colors.yellow;
-        } else {
-          tColor = Colors.red;
+        switch(temporaryP) {
+          case Priority.low:
+            tColor = Colors.green;
+            break;
+          case Priority.medium:
+            tColor = Colors.yellow;
+            break;
+          case Priority.high:
+            tColor = Colors.red;
+            break;
+          case null:
+            break;
         }
         if(!(dateToAdd.isAfter(DateTime.now().add(const Duration(days: -1))))) {
           dateIsAfterT = "due date past!";
         }
         isListEmpty = '';
         int iT = 0; 
-        if(tempereryP == Priorety.low) {
-          pToBeReturnd = 'low';
-          iT = 3;
-        } else if(tempereryP == Priorety.medium) {
-          iT = 2;
-          pToBeReturnd = "medium";
-        } else {
-          iT = 1;
-          pToBeReturnd = "high";
+        switch(temporaryP) {
+          case null:
+            break;
+          case Priority.low:
+            returndP = 'low';
+            iT = 3;
+            break;
+          case Priority.medium:
+            iT = 2;
+            returndP = "medium";
+            break;
+          case Priority.high:
+            iT = 1;
+            returndP = "high";
+            break;
         }
-        todoList.add(Task(name: result, prAndDate: PrAndDate(pr: pToBeReturnd, dueDate: dueDateS), pColor: tColor, dateIsAfter: dateIsAfterT, cat: catToBeReturnd, deco: TextDecoration.none, i: iT));
+        todoList.add(Task(name: result, prAndDate: PrAndDate(pr: temporaryP, dueDate: dueDateS), dateIsAfter: dateIsAfterT, cat: returndCat, deco: TextDecoration.none, i: iT));
         todoList.sort((a, b) => b.i.compareTo(a.i));
+        temporaryP = Priority.low;
       });
       dialogController.clear();
     }
@@ -271,29 +293,34 @@ class _CalcAppState extends State<CalcApp> {
                     initialSelection: 'all',
                     label: const Text('Select category'),
                     onSelected: (String? value) {
-                        if(value == 'all') {
-                          todoListToDisplay = todoList;
-                        } else if(value == 'robotics') {
+                        switch (value) {
+                          case 'all':
+                            todoListToDisplay = todoList;
+                            break;
+                          case 'robotics':
                           todoListToDisplay = [];
                           for(int i = 0; i < todoList.length; i++) {
                             if(todoList[i].cat == 'robotics') {
                               todoListToDisplay.add(todoList[i]);
                             }
                           }
-                        } else if(value == 'school') {
+                          break;
+                        case 'school':
                           todoListToDisplay = [];
                           for(int i = 0; i < todoList.length; i++) {
                             if(todoList[i].cat == 'school') {
                               todoListToDisplay.add(todoList[i]);
                             }
                           }
-                        } else {
+                          break;
+                        case 'home':
                           todoListToDisplay = [];
                           for(int i = 0; i < todoList.length; i++) {
                             if(todoList[i].cat == 'home') {
                               todoListToDisplay.add(todoList[i]);
                             }
                           }
+                          break;
                         }
                       setState((){});
                     },
@@ -310,41 +337,47 @@ class _CalcAppState extends State<CalcApp> {
                 child: ListView(
                   children: 
                   todoListToDisplay.map((Task task) {
-                    return ListTile(
-                      leading: Checkbox(
-                        value: selected.contains(task),
-                        onChanged: (bool? value) {
-                          setState(() {
-                            if (value == true) {
-                              selected.add(task);
-                              task.deco = TextDecoration.lineThrough;
-                            } else {
-                              selected.remove(task);
-                              task.deco = TextDecoration.none;
-                            }
-                          });
-                        },
+                    return Container(
+                      margin: const EdgeInsets.symmetric(vertical: 4.0),
+                      decoration: BoxDecoration(
+                        color: task.prAndDate.pr?.cP ?? Colors.transparent,
+                        borderRadius: BorderRadius.circular(8.0),
                       ),
-                    tileColor: task.pColor,
-                    title: Text(
-                      style: TextStyle(
-                        decoration: task.deco,
-                      ),
-                      '${task.name}    ${task.prAndDate.dueDate}    ${task.prAndDate.pr}    ${task.dateIsAfter}    ${task.cat}'
-                      ),
-                      trailing: IconButton(
-                        icon: const Icon(Icons.delete),
-                        onPressed: () {
-                          setState(() {
-                            todoList.removeWhere((taask) => taask.name == task.name);
-                            todoListToDisplay.removeWhere((ttask) => ttask.name == task.name);
-                          });
-                          if(todoList.isEmpty) {
+                      child: ListTile(
+                        leading: Checkbox(
+                          value: selected.contains(task),
+                          onChanged: (bool? value) {
                             setState(() {
-                              isListEmpty = "no tasks yet";
+                              if (value == true) {
+                                selected.add(task);
+                                task.deco = TextDecoration.lineThrough;
+                              } else {
+                                selected.remove(task);
+                                task.deco = TextDecoration.none;
+                              }
                             });
-                          }
-                        },
+                          },
+                        ),
+                        title: Text(
+                          '${task.name}    ${task.prAndDate.dueDate}    ${task.prAndDate.pr?.titleP ?? 'None'}    ${task.dateIsAfter}    ${task.cat}',
+                          style: TextStyle(
+                            decoration: task.deco,
+                          ),
+                        ),
+                        trailing: IconButton(
+                          icon: const Icon(Icons.delete),
+                          onPressed: () {
+                            setState(() {
+                              todoList.removeWhere((taask) => taask.name == task.name);
+                              todoListToDisplay.removeWhere((ttask) => ttask.name == task.name);
+                            });
+                            if (todoList.isEmpty) {
+                              setState(() {
+                                isListEmpty = "no tasks yet";
+                              });
+                            }
+                          },
+                        ),
                       ),
                     );
                   }).toList(),
