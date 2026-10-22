@@ -47,7 +47,6 @@ Priority? temporaryP = Priority.low;
 Category selectedCategory = Category.robotics;
 Category? temporaryC = Category.robotics;
 CategoryP selectedCategoryP = CategoryP.robotics;
-CategoryP? tempereryCP = CategoryP.all;
 
 String returndCat = 'robotics';
 String returndP = '';
@@ -78,6 +77,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return const MaterialApp(
+      debugShowCheckedModeBanner: false,
       title: 'To do list app',
       home: CalcApp(),
     );
